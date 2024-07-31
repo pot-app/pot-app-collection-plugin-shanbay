@@ -8,36 +8,40 @@ async function collection(source, target, options = {}) {
     }
 
     let body = {
-        "business_id": 6,
-        "words": [source]
+        business_id: 6,
+        words: [source],
     };
 
-    let res = await fetch("https://apiv3.shanbay.com/wordscollection/words_bulk_upload", {
-        method: "POST",
-        headers:
+    let res = await fetch(
+        "https://apiv3.shanbay.com/wordscollection/words_bulk_upload",
         {
-            "Cookie": `auth_token=${authToken}`,
-            "Content-Type": "application/json;charset=UTF-8"
-        }
-        ,
-        body: {
-            type: "Json",
-            payload: body
-        }
-    });
+            method: "POST",
+            headers: {
+                Cookie: `auth_token=${authToken}`,
+                "Content-Type": "application/json;charset=UTF-8",
+            },
+            body: {
+                type: "Json",
+                payload: body,
+            },
+        },
+    );
 
     if (res.ok) {
         const result = res.data;
         if (result.msg) {
             throw result.msg;
-        } else if (result.id) {
-            let check_res = fetch("https://apiv3.shanbay.com/wordscollection/words_bulk_upload", {
-                method: "GET",
-                query: { "business_id": "6", "task_id": result.id },
-                headers: {
-                    "Cookie": `auth_token=${authToken}`
-                }
-            });
+        } else if (result["task_id"]) {
+            let check_res = await fetch(
+                "https://apiv3.shanbay.com/wordscollection/words_bulk_upload",
+                {
+                    method: "GET",
+                    query: { business_id: "6", task_id: result["task_id"] },
+                    headers: {
+                        Cookie: `auth_token=${authToken}`,
+                    },
+                },
+            );
             const check_result = check_res.data;
             const { failed_count } = check_result;
             if (failed_count > 0) {
